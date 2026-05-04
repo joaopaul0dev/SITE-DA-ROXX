@@ -607,6 +607,127 @@ ul {
 }
 
 /* ==============================
+   SEÇÃO NOSSA HISTÓRIA
+   ============================== */
+
+/* Wrapper da foto — badge sobreposto */
+.history-img-wrapper {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.history-img {
+    height: 520px;
+    object-fit: cover;
+    object-position: top center;
+}
+
+.history-img-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+    padding: 2rem 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.history-badge-rank {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary-red);
+}
+
+.history-badge-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+/* Destaque vermelho no título */
+.history-red {
+    color: var(--primary-red);
+}
+
+/* Timeline */
+.history-timeline {
+    margin-top: 2rem;
+}
+
+.history-timeline-item {
+    display: flex;
+    gap: 1.25rem;
+    position: relative;
+}
+
+.history-timeline-item:not(.history-timeline-last)::after {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 20px;
+    bottom: 0;
+    width: 2px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.history-dot {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(220, 38, 38, 0.35);
+    background-color: var(--darker-bg);
+    margin-top: 3px;
+    position: relative;
+    z-index: 1;
+    transition: var(--transition);
+}
+
+.history-dot-active {
+    border-color: var(--primary-red);
+    background-color: var(--primary-red);
+}
+
+.history-timeline-item:hover .history-dot {
+    border-color: var(--primary-red);
+}
+
+.history-entry {
+    padding-bottom: 2rem;
+}
+
+.history-year {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary-red);
+    margin-bottom: 0.4rem;
+}
+
+.history-entry p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.75;
+}
+
+@media (max-width: 768px) {
+    .history-img {
+        height: 380px;
+    }
+}
+
+/* ==============================
    HORÁRIOS DA ACADEMIA
    ============================== */
 .schedule-container {
@@ -708,11 +829,13 @@ ul {
     .schedule-table {
         display: none;
     }
+
     .schedule-container {
         background: transparent;
         border: none;
         box-shadow: none;
     }
+
     .schedule-cards {
         display: flex;
     }
