@@ -1,39 +1,223 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Revelar elementos ao rolar a página
-    const revealElements = document.querySelectorAll('.reveal');
 
-    const revealOptions = {
-        threshold: 0.15,
-        rootMargin: "0px 0px -50px 0px"
-    };
+    /* ══════════════════════════════════════════════════
+       1. REVEAL ON SCROLL (existente — mantido)
+       ══════════════════════════════════════════════════ */
+    const revealElements = document.querySelectorAll('.reveal, .reveal-blur');
 
-    const revealOnScroll = new IntersectionObserver(function(
-        entries,
-        observer
-    ) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-                return;
-            } else {
+            if (entry.isIntersecting) {
                 entry.target.classList.add('active');
                 observer.unobserve(entry.target);
             }
         });
-    }, revealOptions);
-
-    revealElements.forEach(el => {
-        revealOnScroll.observe(el);
+    }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
     });
-    
-    // Efeito de rolagem da barra de navegação
-    const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(5, 5, 5, 0.95)';
-            navbar.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+
+    /* ══════════════════════════════════════════════════
+       2. NAVBAR PREMIUM — SMART SCROLL
+       ══════════════════════════════════════════════════ */
+    const navbar = document.getElementById('navbar');
+
+    const handleNavbarScroll = () => {
+        if (window.scrollY > 60) {
+            navbar.classList.add('nav-scrolled');
         } else {
-            navbar.style.background = 'rgba(10, 10, 10, 0.85)';
-            navbar.style.boxShadow = 'none';
+            navbar.classList.remove('nav-scrolled');
+        }
+    };
+
+    window.addEventListener('scroll', handleNavbarScroll, { passive: true });
+    handleNavbarScroll(); // run once on load
+
+
+    /* ══════════════════════════════════════════════════
+       3. ACTIVE NAV LINK on scroll
+       ══════════════════════════════════════════════════ */
+    const navLinksAll = document.querySelectorAll('.nav-link');
+    const sections    = document.querySelectorAll('section[id]');
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinksAll.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, {
+        threshold: 0.35,
+        rootMargin: '-10% 0px -55% 0px'
+    });
+
+    sections.forEach(section => sectionObserver.observe(section));
+
+
+    /* ══════════════════════════════════════════════════
+       4. MOBILE MENU
+       ══════════════════════════════════════════════════ */
+    const hamburgerBtn  = document.getElementById('hamburgerBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobileClose   = document.getElementById('mobileClose');
+    const mobileLinks   = document.querySelectorAll('.mobile-nav-link');
+
+    const openMenu = () => {
+        hamburgerBtn.classList.add('is-active');
+        mobileMenu.classList.add('is-open');
+        mobileOverlay.classList.add('is-open');
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        mobileOverlay.setAttribute('aria-hidden', 'false');
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeMenu = () => {
+        hamburgerBtn.classList.remove('is-active');
+        mobileMenu.classList.remove('is-open');
+        mobileOverlay.classList.remove('is-open');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        mobileOverlay.setAttribute('aria-hidden', 'true');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    };
+
+    hamburgerBtn.addEventListener('click', () => {
+        mobileMenu.classList.contains('is-open') ? closeMenu() : openMenu();
+    });
+
+    mobileClose.addEventListener('click', closeMenu);
+    mobileOverlay.addEventListener('click', closeMenu);
+    mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+    // Close on Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
+            closeMenu();
         }
     });
+
+
+    /* ══════════════════════════════════════════════════
+       5. COUNTER ANIMATION (métricas)
+       ══════════════════════════════════════════════════ */
+    const counterEls   = document.querySelectorAll('.metric-number');
+    const metricsGrid  = document.querySelector('.metrics-grid');
+    let countersStarted = false;
+
+    const easeOut = (t) => 1 - Math.pow(1 - t, 3); // cubic ease-out
+
+    const animateCounters = () => {
+        const duration = 2000; // ms
+        const startTime = performance.now();
+
+        const tick = (currentTime) => {
+            const elapsed  = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased    = easeOut(progress);
+
+            counterEls.forEach(el => {
+                const target = parseInt(el.getAttribute('data-target'), 10);
+                el.textContent = Math.floor(eased * target);
+            });
+
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                // Ensure exact final values
+                counterEls.forEach(el => {
+                    el.textContent = el.getAttribute('data-target');
+                });
+            }
+        };
+
+        requestAnimationFrame(tick);
+    };
+
+    if (metricsGrid && counterEls.length > 0) {
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !countersStarted) {
+                    countersStarted = true;
+                    animateCounters();
+                    counterObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        counterObserver.observe(metricsGrid);
+    }
+
+
+    /* ══════════════════════════════════════════════════
+       6. FAQ ACCORDION
+       ══════════════════════════════════════════════════ */
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const btn = item.querySelector('.faq-question');
+
+        btn.addEventListener('click', () => {
+            const isOpen = item.classList.contains('is-open');
+
+            // Close all items
+            faqItems.forEach(i => {
+                i.classList.remove('is-open');
+                i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+            });
+
+            // Open the clicked one (toggle)
+            if (!isOpen) {
+                item.classList.add('is-open');
+                btn.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+
+    /* ══════════════════════════════════════════════════
+       7. CONTACT FORM → WHATSAPP
+       ══════════════════════════════════════════════════ */
+    const contactForm = document.getElementById('contactForm');
+
+    if (contactForm) {
+        const nameInput    = document.getElementById('contactName');
+        const phoneInput   = document.getElementById('contactPhone');
+        const messageInput = document.getElementById('contactMessage');
+
+        const markError = (input) => {
+            input.classList.add('has-error');
+            input.addEventListener('input', () => input.classList.remove('has-error'), { once: true });
+        };
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name    = nameInput.value.trim();
+            const phone   = phoneInput.value.trim();
+            const message = messageInput.value.trim();
+
+            let valid = true;
+            if (!name)    { markError(nameInput);    valid = false; }
+            if (!phone)   { markError(phoneInput);   valid = false; }
+            if (!message) { markError(messageInput); valid = false; }
+
+            if (!valid) return;
+
+            const text = `Olá! Meu nome é ${name}. Meu contato: ${phone}. Mensagem: ${message}`;
+            const url  = `https://wa.me/5584994243772?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        });
+    }
+
 });
