@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ══════════════════════════════════════════════════
-       1. REVEAL ON SCROLL (existente — mantido)
+       1. REVEAL ON SCROLL — blur + fade-up
        ══════════════════════════════════════════════════ */
     const revealElements = document.querySelectorAll('.reveal, .reveal-blur');
 
@@ -13,11 +13,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, {
-        threshold: 0.12,
-        rootMargin: '0px 0px -40px 0px'
+        threshold: 0.08,
+        rootMargin: '0px 0px -30px 0px'
     });
 
     revealElements.forEach(el => revealObserver.observe(el));
+
+    /* Spotlight effect on manifesto cards */
+    document.querySelectorAll('.manifesto-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1);
+            const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1);
+            card.style.setProperty('--mx', `${x}%`);
+            card.style.setProperty('--my', `${y}%`);
+        });
+    });
 
 
     /* ══════════════════════════════════════════════════
